@@ -26,7 +26,11 @@ These scripts will:
 1. Bump the version in package.json
 2. Create a git commit with the version change
 3. Create a git tag
-4. Publish to npm
+
+**Then manually publish:**
+```bash
+npm publish
+```
 
 ### Option 2: Manual version bump
 
@@ -96,10 +100,13 @@ npm run build
 git add .
 git commit -m "Fix: Update file system adapter handling"
 
-# 4. Bump version and publish
+# 4. Bump version
 npm run version:patch
 
-# 5. Push to git (including tags)
+# 5. Review changes, then publish
+npm publish
+
+# 6. Push to git (including tags)
 git push && git push --tags
 ```
 

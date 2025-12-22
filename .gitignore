@@ -11,4 +11,8 @@ build/
 *.hprof
 .expo/
 .expo-shared/
+*.tgz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
