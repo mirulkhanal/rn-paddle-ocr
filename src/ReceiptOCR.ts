@@ -1,4 +1,3 @@
-import * as ort from 'onnxruntime-react-native';
 import { DetResizeMeta } from './postprocess/DetResizeMeta';
 import { DBPostProcessor } from './postprocess/DBPostProcessor';
 import { ImageUtils } from './utils/ImageUtils';
@@ -8,9 +7,32 @@ import { Box } from './types/Box.interface';
 import { OcrResult } from './types/OcrResult.interface';
 import { FileSystemAdapter } from './types/FileSystemAdapter.interface';
 
+// Lazy load onnxruntime-react-native to avoid native module initialization issues
+// Using require with lazy evaluation to prevent immediate native module initialization
+let ortModule: any = null;
+
+function getOrt(): any {
+  if (!ortModule) {
+    try {
+      // Use require() which is evaluated lazily when first called
+      ortModule = require('onnxruntime-react-native');
+      if (!ortModule || !ortModule.InferenceSession || !ortModule.Tensor) {
+        throw new Error('onnxruntime-react-native module is not properly loaded');
+      }
+    } catch (error) {
+      throw new Error(
+        `Failed to load onnxruntime-react-native. Make sure it's installed and properly linked: npm install onnxruntime-react-native. ` +
+        `You may need to rebuild your app after installing native dependencies. ` +
+        `Error: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+  return ortModule;
+}
+
 export class ReceiptOCR {
-  private detSession: ort.InferenceSession | null = null;
-  private recSession: ort.InferenceSession | null = null;
+  private detSession: any | null = null;
+  private recSession: any | null = null;
   private postProcessor: DBPostProcessor;
   private characterDict: string[] | null = null;
   private fsAdapter: FileSystemAdapter | null = null;
@@ -80,15 +102,16 @@ export class ReceiptOCR {
       );
 
       const floatData = ImageUtils.pixelsToNCHW(crop, targetW, targetH);
+      const ort = getOrt();
       const inputTensor = new ort.Tensor('float32', floatData, [1, 3, targetH, targetW]);
 
-      const feeds: Record<string, ort.Tensor<Float32Array, 'float32'>> = {};
+      const feeds: Record<string, any> = {};
       const inputNames = this.recSession.inputNames;
       feeds[inputNames[0]] = inputTensor;
 
       const outputMap = await this.recSession.run(feeds);
       const outputNames = this.recSession.outputNames;
-      const outputTensor = outputMap[outputNames[0]] as ort.Tensor<Float32Array, 'float32'>;
+      const outputTensor = outputMap[outputNames[0]] as any;
       const dims = outputTensor.dims;
 
       const timeSteps = dims[dims.length - 2] ?? 0;
@@ -111,6 +134,7 @@ export class ReceiptOCR {
 
   async loadModel(modelPath: string | number): Promise<void> {
     try {
+      const ort = getOrt();
       this.detSession = await ort.InferenceSession.create(modelPath);
     } catch (e) {
       throw new Error(`Failed to load detection model: ${e instanceof Error ? e.message : String(e)}`);
@@ -119,6 +143,7 @@ export class ReceiptOCR {
 
   async loadRecognitionModel(modelPath: string | number): Promise<void> {
     try {
+      const ort = getOrt();
       this.recSession = await ort.InferenceSession.create(modelPath);
     } catch (e) {
       throw new Error(`Failed to load recognition model: ${e instanceof Error ? e.message : String(e)}`);
@@ -166,15 +191,16 @@ export class ReceiptOCR {
     const padded = ImageUtils.padRGBA(resizedPixels, resizeMeta.resizeW, resizeMeta.resizeH, padW, padH);
     const floatData = ImageUtils.pixelsToNCHW(padded, padW, padH);
 
+    const ort = getOrt();
     const inputTensor = new ort.Tensor('float32', floatData, [1, 3, padH, padW]);
 
-    const feeds: Record<string, ort.Tensor<Float32Array, 'float32'>> = {};
+    const feeds: Record<string, any> = {};
     const inputNames = this.detSession.inputNames;
     feeds[inputNames[0]] = inputTensor;
 
     const outputMap = await this.detSession.run(feeds);
     const outputNames = this.detSession.outputNames;
-    const outputTensor = outputMap[outputNames[0]] as ort.Tensor<Float32Array, 'float32'>;
+    const outputTensor = outputMap[outputNames[0]] as any;
 
     const { pred, width, height } = this.extractDetMap(outputTensor);
     const cropW = resizeMeta.resizeW;
@@ -194,7 +220,7 @@ export class ReceiptOCR {
     return boxes;
   }
 
-  private extractDetMap(outputTensor: ort.Tensor<Float32Array, 'float32'>): { pred: Float32Array; width: number; height: number } {
+  private extractDetMap(outputTensor: any): { pred: Float32Array; width: number; height: number } {
     const dims = outputTensor.dims;
     if (dims.length < 2) {
       throw new Error(`Unexpected output dims: [${dims.join(', ')}]`);
