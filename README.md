@@ -12,17 +12,36 @@ npm install @mirulkhanall/rn-paddle-ocr onnxruntime-react-native
 
 ### Basic Usage with Expo FileSystem
 
+The package will attempt to use bundled models automatically. If that fails, provide model paths:
+
 ```typescript
-import Ocr, { getDefaultModelPaths } from '@mirulkhanall/rn-paddle-ocr';
+import Ocr from '@mirulkhanall/rn-paddle-ocr';
 import * as FileSystem from 'expo-file-system';
 
-// Initialize with bundled models
-const modelPaths = getDefaultModelPaths();
-
+// Option 1: Try automatic model resolution (attempts to use packaged models)
+// If this fails, provide paths explicitly (see Option 2)
 await Ocr.init({
-  detModelPath: modelPaths.detModelPath,
-  recModelPath: modelPaths.recModelPath,
-  characterDictPath: modelPaths.characterDictPath,
+  fileSystemAdapter: {
+    readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
+  }
+});
+
+// Option 2: Provide model paths explicitly
+// Copy models from node_modules/@mirulkhanall/rn-paddle-ocr/models/ to your app assets
+await Ocr.init({
+  detModelPath: require('./assets/models/inference_det.onnx'),
+  recModelPath: require('./assets/models/inference_rec.onnx'),
+  characterDict: require('./assets/models/character_dict.json'),
+  fileSystemAdapter: {
+    readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
+  }
+});
+
+// Option 3: Use file system paths (copy models to app bundle first)
+await Ocr.init({
+  detModelPath: `${FileSystem.bundleDirectory}models/inference_det.onnx`,
+  recModelPath: `${FileSystem.bundleDirectory}models/inference_rec.onnx`,
+  characterDictPath: `${FileSystem.bundleDirectory}models/character_dict.json`,
   fileSystemAdapter: {
     readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
   }
@@ -39,21 +58,6 @@ results.forEach(result => {
 });
 ```
 
-### Using Bundled Models with require()
-
-```typescript
-import Ocr from '@mirulkhanall/rn-paddle-ocr';
-import * as FileSystem from 'expo-file-system';
-
-await Ocr.init({
-  detModelPath: require('./node_modules/@mirulkhanall/rn-paddle-ocr/models/exported_det/inference.onnx'),
-  recModelPath: require('./node_modules/@mirulkhanall/rn-paddle-ocr/models/exported_rec/inference.onnx'),
-  characterDictPath: require('./node_modules/@mirulkhanall/rn-paddle-ocr/models/character_dict.json'),
-  fileSystemAdapter: {
-    readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
-  }
-});
-```
 
 ### Using React Native FS
 
@@ -123,9 +127,6 @@ Array of `OcrResult` objects containing:
 - `text`: Detected text string
 - `confidence`: Confidence score (0-1)
 
-### `getDefaultModelPaths(): { detModelPath: string, recModelPath: string, characterDictPath: string }`
-
-Helper function to get paths to the bundled models included with the package. Note: In React Native, you may need to use `require()` or asset paths instead of file system paths.
 
 ## Types
 
