@@ -7,18 +7,21 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "lint": "eslint . --ext .ts,.tsx",
-    "test": "jest"
+    "test": "echo \"Run: node test.js after installing dependencies\"",
+    "version:patch": "npm version patch && npm publish",
+    "version:minor": "npm version minor && npm publish",
+    "version:major": "npm version major && npm publish"
   },
   "keywords": [
     "react-native",
     "ocr",
     "receipt",
     "paddleocr",
-    "expo",
     "multilingual",
     "chinese",
-    "english"
+    "english",
+    "onnx",
+    "expo"
   ],
   "author": "",
   "license": "MIT",
@@ -26,25 +29,26 @@
     "type": "git",
     "url": ""
   },
-  "peerDependencies": {
-    "react": ">=18.0.0",
-    "react-native": ">=0.81.0"
-  },
   "devDependencies": {
-    "@types/react": "^18.2.0",
-    "@types/react-native": "^0.81.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.0.0",
+    "@types/node": "^18.0.0",
+    "@types/jpeg-js": "^0.3.7",
     "typescript": "^5.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "jpeg-js": "^0.4.4",
+    "js-clipper": "^1.0.1",
+    "onnxruntime-react-native": "^1.19.0"
+  },
   "files": [
     "build/",
-    "android/",
-    "ios/",
-    "src/",
-    "*.md"
-  ]
+    "models/"
+  ],
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-native": ">=0.70.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
-

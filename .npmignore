@@ -1,4 +1,3 @@
-node_modules/
 src/
 *.ts
 !*.d.ts
@@ -7,8 +6,13 @@ tsconfig.json
 .gitignore
 *.log
 .DS_Store
-.expo/
-.expo-shared/
+test.js
+test.ts
+node_modules/
 *.md
 !README.md
-
+.eslintrc.js
+.expo/
+.expo-shared/
+android/
+ios/

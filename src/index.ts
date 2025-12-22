@@ -1,3 +1,11 @@
-export { initialize, scanReceipt, isInitialized, default as OcrReceiptScanner } from './OcrReceiptScanner';
-export type { ReceiptData, OcrError, ImageSource, ImageInput } from './types/ReceiptData.interface';
+export { Ocr } from './Ocr';
+export { ReceiptOCR } from './ReceiptOCR';
+export { getDefaultModelPaths } from './getModelPaths';
+export type { OcrResult } from './types/OcrResult.interface';
+export type { OcrConfig } from './types/OcrConfig.interface';
+export type { Box } from './types/Box.interface';
+export type { Point } from './types/Point.interface';
+export type { FileSystemAdapter } from './types/FileSystemAdapter.interface';
 
+import { Ocr } from './Ocr';
+export default Ocr;
