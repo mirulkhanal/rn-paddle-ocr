@@ -4,31 +4,29 @@
  */
 
 import { OcrConfig } from '../types/OcrConfig.interface';
-
-/**
- * Gets the path to the installed package root
- */
-function getPackageRoot(): string | null {
-  try {
-    // Resolve the package.json to find where the package is installed
-    const packageJsonPath = require.resolve('@mirulkhanall/rn-paddle-ocr/package.json');
-    // Use path.dirname to get the package root directory
-    // Note: We can't use 'path' module in React Native, so we'll use string manipulation
-    const parts = packageJsonPath.split('/');
-    // Remove 'package.json' from the end
-    parts.pop();
-    return parts.join('/');
-  } catch {
-    return null;
-  }
-}
+import { getDefaultModelPaths } from './modelPaths';
 
 /**
  * Attempts to resolve default bundled models
  * Returns model config if successful, null if models not accessible
  */
 export function tryResolveDefaultModels(config: OcrConfig): Partial<OcrConfig> | null {
-  // Approach 1: Try require() - works if Metro bundler is configured for .onnx files
+  // If fileSystemAdapter is provided, we can use the bundled models from the package
+  if (config.fileSystemAdapter) {
+    try {
+      const paths = getDefaultModelPaths();
+      return {
+        detModelPath: paths.detModelPath,
+        recModelPath: paths.recModelPath,
+        characterDictPath: paths.characterDictPath
+      };
+    } catch (error) {
+      // If we can't get paths, return null and let user provide paths
+      return null;
+    }
+  }
+  
+  // Try require() approach as fallback (works if Metro bundler is configured for .onnx files)
   try {
     const detModel = require('@mirulkhanall/rn-paddle-ocr/models/exported_det/inference.onnx');
     const recModel = require('@mirulkhanall/rn-paddle-ocr/models/exported_rec/inference.onnx');
@@ -42,20 +40,7 @@ export function tryResolveDefaultModels(config: OcrConfig): Partial<OcrConfig> |
       };
     }
   } catch {
-    // Continue to next approach
-  }
-  
-  // Approach 2: Use file system adapter to read from installed package location
-  // This works because models are published with the package (in package.json "files" array)
-  if (config.fileSystemAdapter) {
-    const packageRoot = getPackageRoot();
-    if (packageRoot) {
-      return {
-        detModelPath: `${packageRoot}/models/exported_det/inference.onnx`,
-        recModelPath: `${packageRoot}/models/exported_rec/inference.onnx`,
-        characterDictPath: `${packageRoot}/models/character_dict.json`
-      };
-    }
+    // Continue - require() approach failed
   }
   
   return null;
