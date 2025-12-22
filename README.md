@@ -12,14 +12,18 @@ npm install @mirulkhanall/rn-paddle-ocr onnxruntime-react-native
 
 ### Basic Usage with Expo FileSystem (Recommended)
 
-**Simple usage - automatically uses bundled models:**
+**Option 1: Copy models to your app assets (Simplest - Recommended for Expo):**
+
+Copy the model files from `node_modules/@mirulkhanall/rn-paddle-ocr/models/` to your app's assets folder (e.g., `assets/models/`), then:
 
 ```typescript
 import Ocr from '@mirulkhanall/rn-paddle-ocr';
 import * as FileSystem from 'expo-file-system';
 
-// Just provide fileSystemAdapter - models are loaded automatically!
 await Ocr.init({
+  detModelPath: require('./assets/models/exported_det/inference.onnx'),
+  recModelPath: require('./assets/models/exported_rec/inference.onnx'),
+  characterDict: require('./assets/models/character_dict.json'),
   fileSystemAdapter: {
     readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
   }
@@ -33,6 +37,22 @@ results.forEach(result => {
   console.log(`Text: ${result.text}`);
   console.log(`Confidence: ${result.confidence}`);
   console.log(`Box:`, result.box.points);
+});
+```
+
+**Option 2: Automatic resolution (requires Metro configuration):**
+
+The package will attempt to automatically resolve bundled models when you provide `fileSystemAdapter`. However, this requires configuring Metro bundler to bundle `.onnx` files from `node_modules`. See [Metro Configuration](#metro-configuration) below.
+
+```typescript
+import Ocr from '@mirulkhanall/rn-paddle-ocr';
+import * as FileSystem from 'expo-file-system';
+
+// Attempts automatic resolution (may require Metro config)
+await Ocr.init({
+  fileSystemAdapter: {
+    readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
+  }
 });
 ```
 
@@ -148,6 +168,28 @@ interface OcrResult {
 }
 ```
 
+## Metro Configuration (for Automatic Model Resolution)
+
+To enable automatic model resolution without copying models to your app assets, you need to configure Metro bundler to bundle `.onnx` files from `node_modules`. 
+
+Create or update `metro.config.js` in your project root:
+
+```javascript
+const { getDefaultConfig } = require('expo/metro-config');
+
+const config = getDefaultConfig(__dirname);
+
+// Add .onnx to asset extensions
+config.resolver.assetExts.push('onnx');
+
+// Optionally, configure source extensions if needed
+// config.resolver.sourceExts.push('onnx');
+
+module.exports = config;
+```
+
+**Note:** Even with Metro configuration, the recommended approach is to copy models to your app assets folder (Option 1 above) for better reliability and smaller bundle sizes (models are only included when explicitly required).
+
 ## Requirements
 
 - React Native >= 0.70.0
@@ -157,11 +199,11 @@ interface OcrResult {
 
 ## Models
 
-Models are included in the package under `models/`. To use them in React Native:
+Models are included in the package under `models/`. The recommended approach is to copy them to your app's assets folder:
 
-1. **Bundle as assets**: Copy models to your app's assets and reference them
-2. **Use require()**: Reference models using `require()` statements
-3. **Download at runtime**: Download models on first use
+1. **Copy models to app assets** (Recommended): Copy `models/` folder from `node_modules/@mirulkhanall/rn-paddle-ocr/models/` to your app's assets directory
+2. **Use require()**: Reference models using `require()` statements after copying
+3. **Configure Metro**: Set up Metro bundler to bundle `.onnx` files from `node_modules` (see Metro Configuration above)
 
 ## Platform Support
 

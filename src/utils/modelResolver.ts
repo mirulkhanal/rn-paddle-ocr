@@ -9,38 +9,42 @@ import { getDefaultModelPaths } from './modelPaths';
 /**
  * Attempts to resolve default bundled models
  * Returns model config if successful, null if models not accessible
+ * Tries require() first (works with Metro bundler), then falls back to file system paths
  */
 export function tryResolveDefaultModels(config: OcrConfig): Partial<OcrConfig> | null {
-  // If fileSystemAdapter is provided, we can use the bundled models from the package
-  if (config.fileSystemAdapter) {
+  // Strategy 1: Try to use require() to get bundled asset references
+  // This is the preferred approach for React Native/Expo as it works with Metro bundler
+  // We try this first regardless of fileSystemAdapter since onnxruntime can handle asset IDs directly
+  const paths = getDefaultModelPaths();
+  
+  // If getDefaultModelPaths() successfully used require() and got asset references
+  // (indicated by having characterDict array instead of characterDictPath)
+  if (paths.characterDict && (typeof paths.detModelPath === 'number' || typeof paths.detModelPath === 'string')) {
+    return {
+      detModelPath: paths.detModelPath,
+      recModelPath: paths.recModelPath,
+      characterDict: paths.characterDict
+    };
+  }
+  
+  // Strategy 2: If require() failed but fileSystemAdapter is provided,
+  // try using file system paths (may work in some environments)
+  if (config.fileSystemAdapter && paths.characterDictPath) {
     try {
-      const paths = getDefaultModelPaths();
       return {
         detModelPath: paths.detModelPath,
         recModelPath: paths.recModelPath,
         characterDictPath: paths.characterDictPath
       };
     } catch (error) {
-      // If we can't get paths, return null and let user provide paths
-      return null;
-    }
-  }
-  
-  // Try require() approach as fallback (works if Metro bundler is configured for .onnx files)
-  try {
-    const detModel = require('@mirulkhanall/rn-paddle-ocr/models/exported_det/inference.onnx');
-    const recModel = require('@mirulkhanall/rn-paddle-ocr/models/exported_rec/inference.onnx');
-    const characterDict = require('@mirulkhanall/rn-paddle-ocr/models/character_dict.json');
-    
-    if (detModel && recModel && characterDict) {
+      // File system paths might not work in React Native, but we return them anyway
+      // The actual error will occur when trying to load the models
       return {
-        detModelPath: detModel,
-        recModelPath: recModel,
-        characterDict: Array.isArray(characterDict) ? characterDict : undefined
+        detModelPath: paths.detModelPath,
+        recModelPath: paths.recModelPath,
+        characterDictPath: paths.characterDictPath
       };
     }
-  } catch {
-    // Continue - require() approach failed
   }
   
   return null;
@@ -71,16 +75,32 @@ export function resolveModelConfig(config: OcrConfig): OcrConfig {
   
   // Validate that we have all required fields after merging
   if (!resolved.detModelPath || !resolved.recModelPath) {
-    throw new Error(
-      'Model paths required. Please provide detModelPath and recModelPath, ' +
-      'or provide fileSystemAdapter to use bundled models automatically. ' +
-      'Example: Ocr.init({ fileSystemAdapter: FileSystem })'
-    );
+    const hasFileSystemAdapter = !!config.fileSystemAdapter;
+    const errorMessage = hasFileSystemAdapter
+      ? 'Failed to automatically resolve bundled models. ' +
+        'React Native/Expo requires models to be bundled as assets. ' +
+        'Please do one of the following:\n' +
+        '1. Copy models to your app assets folder and use require():\n' +
+        '   await Ocr.init({\n' +
+        '     detModelPath: require("./assets/models/inference_det.onnx"),\n' +
+        '     recModelPath: require("./assets/models/inference_rec.onnx"),\n' +
+        '     characterDict: require("./assets/models/character_dict.json"),\n' +
+        '     fileSystemAdapter: FileSystem\n' +
+        '   });\n' +
+        '2. Configure Metro bundler to bundle .onnx files from node_modules (see package README)\n' +
+        '3. Use file paths if models are accessible via fileSystemAdapter'
+      : 'Model paths required. Please provide detModelPath and recModelPath, ' +
+        'or provide fileSystemAdapter to attempt automatic resolution. ' +
+        'Example: Ocr.init({ fileSystemAdapter: FileSystem })';
+    
+    throw new Error(errorMessage);
   }
   
   if (!resolved.characterDict && !resolved.characterDictPath) {
     throw new Error(
-      'Character dictionary required. Provide either characterDict (array) or characterDictPath (with fileSystemAdapter).'
+      'Character dictionary required. Provide either characterDict (array) or characterDictPath (with fileSystemAdapter). ' +
+      'When using require() for models, use characterDict array. ' +
+      'When using file paths, use characterDictPath with fileSystemAdapter.'
     );
   }
   
