@@ -5,7 +5,7 @@ React Native package for OCR receipt scanning using PaddleOCR models with multil
 ## Installation
 
 ```bash
-npm install ocr-receipt-scanner onnxruntime-react-native
+npm install @mirulkhanall/rn-paddle-ocr onnxruntime-react-native
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install ocr-receipt-scanner onnxruntime-react-native
 ### Basic Usage with Expo FileSystem
 
 ```typescript
-import Ocr, { getDefaultModelPaths } from 'ocr-receipt-scanner';
+import Ocr, { getDefaultModelPaths } from '@mirulkhanall/rn-paddle-ocr';
 import * as FileSystem from 'expo-file-system';
 
 // Initialize with bundled models
@@ -42,13 +42,13 @@ results.forEach(result => {
 ### Using Bundled Models with require()
 
 ```typescript
-import Ocr from 'ocr-receipt-scanner';
+import Ocr from '@mirulkhanall/rn-paddle-ocr';
 import * as FileSystem from 'expo-file-system';
 
 await Ocr.init({
-  detModelPath: require('./node_modules/ocr-receipt-scanner/models/exported_det/inference.onnx'),
-  recModelPath: require('./node_modules/ocr-receipt-scanner/models/exported_rec/inference.onnx'),
-  characterDictPath: require('./node_modules/ocr-receipt-scanner/models/character_dict.json'),
+  detModelPath: require('./node_modules/@mirulkhanall/rn-paddle-ocr/models/exported_det/inference.onnx'),
+  recModelPath: require('./node_modules/@mirulkhanall/rn-paddle-ocr/models/exported_rec/inference.onnx'),
+  characterDictPath: require('./node_modules/@mirulkhanall/rn-paddle-ocr/models/character_dict.json'),
   fileSystemAdapter: {
     readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
   }
@@ -58,7 +58,7 @@ await Ocr.init({
 ### Using React Native FS
 
 ```typescript
-import Ocr from 'ocr-receipt-scanner';
+import Ocr from '@mirulkhanall/rn-paddle-ocr';
 import RNFS from 'react-native-fs';
 
 await Ocr.init({
@@ -78,7 +78,7 @@ await Ocr.init({
 When using `require()` for models, use `characterDict` array for the dictionary (since `require()` for JSON returns the parsed object):
 
 ```typescript
-import Ocr from 'ocr-receipt-scanner';
+import Ocr from '@mirulkhanall/rn-paddle-ocr';
 import characterDict from './assets/character_dict.json';
 
 await Ocr.init({

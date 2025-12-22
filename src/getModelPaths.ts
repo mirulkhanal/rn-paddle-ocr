@@ -9,14 +9,14 @@ export function getDefaultModelPaths(): {
   recModelPath: string;
   characterDictPath: string;
 } {
-  // Find the package root by looking for node_modules/ocr-receipt-scanner or using __dirname
-  // In a published package, models will be at: node_modules/ocr-receipt-scanner/models/
+  // Find the package root by looking for node_modules/@mirulkhanall/rn-paddle-ocr or using __dirname
+  // In a published package, models will be at: node_modules/@mirulkhanall/rn-paddle-ocr/models/
   
   // Try to resolve from package location
   let packageRoot: string;
   try {
     // This works when the package is installed as a dependency
-    packageRoot = path.dirname(require.resolve('ocr-receipt-scanner/package.json'));
+    packageRoot = path.dirname(require.resolve('@mirulkhanall/rn-paddle-ocr/package.json'));
   } catch {
     // Fallback to __dirname for development
     packageRoot = path.join(__dirname, '..');
