@@ -27,7 +27,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/mirulkhanal/rn-paddle-ocr.git"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
