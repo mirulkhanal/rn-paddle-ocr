@@ -1,0 +1,50 @@
+{
+  "name": "ocr-receipt-scanner",
+  "version": "1.0.0",
+  "description": "React Native package for OCR receipt scanning using PaddleOCR models with multilingual support (Simplified/Traditional Chinese, English)",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "jest"
+  },
+  "keywords": [
+    "react-native",
+    "ocr",
+    "receipt",
+    "paddleocr",
+    "expo",
+    "multilingual",
+    "chinese",
+    "english"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-native": ">=0.81.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-native": "^0.81.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {},
+  "files": [
+    "build/",
+    "android/",
+    "ios/",
+    "src/",
+    "*.md"
+  ]
+}
+

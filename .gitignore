@@ -1,0 +1,14 @@
+node_modules/
+build/
+*.log
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+*.hprof
+.expo/
+.expo-shared/
+

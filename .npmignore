@@ -1,0 +1,14 @@
+node_modules/
+src/
+*.ts
+!*.d.ts
+tsconfig.json
+.git/
+.gitignore
+*.log
+.DS_Store
+.expo/
+.expo-shared/
+*.md
+!README.md
+
