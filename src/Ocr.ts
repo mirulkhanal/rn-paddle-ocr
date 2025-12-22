@@ -15,7 +15,7 @@ async function ensureInitialized(config?: OcrConfig): Promise<void> {
     throw new Error('OCR not initialized. Call Ocr.init(config) first or pass config to Ocr.scan().');
   }
 
-  // Resolve model config - uses defaults if not provided, or user-provided paths
+  // Resolve model config - automatically uses bundled models if paths not provided
   const resolvedConfig = resolveModelConfig(config);
 
   ocrInstance = new ReceiptOCR(resolvedConfig.fileSystemAdapter);

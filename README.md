@@ -10,38 +10,16 @@ npm install @mirulkhanall/rn-paddle-ocr onnxruntime-react-native
 
 ## Usage
 
-### Basic Usage with Expo FileSystem
+### Basic Usage with Expo FileSystem (Recommended)
 
-The package will attempt to use bundled models automatically. If that fails, provide model paths:
+**Simple usage - automatically uses bundled models:**
 
 ```typescript
 import Ocr from '@mirulkhanall/rn-paddle-ocr';
 import * as FileSystem from 'expo-file-system';
 
-// Option 1: Try automatic model resolution (attempts to use packaged models)
-// If this fails, provide paths explicitly (see Option 2)
+// Just provide fileSystemAdapter - models are loaded automatically!
 await Ocr.init({
-  fileSystemAdapter: {
-    readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
-  }
-});
-
-// Option 2: Provide model paths explicitly
-// Copy models from node_modules/@mirulkhanall/rn-paddle-ocr/models/ to your app assets
-await Ocr.init({
-  detModelPath: require('./assets/models/inference_det.onnx'),
-  recModelPath: require('./assets/models/inference_rec.onnx'),
-  characterDict: require('./assets/models/character_dict.json'),
-  fileSystemAdapter: {
-    readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
-  }
-});
-
-// Option 3: Use file system paths (copy models to app bundle first)
-await Ocr.init({
-  detModelPath: `${FileSystem.bundleDirectory}models/inference_det.onnx`,
-  recModelPath: `${FileSystem.bundleDirectory}models/inference_rec.onnx`,
-  characterDictPath: `${FileSystem.bundleDirectory}models/character_dict.json`,
   fileSystemAdapter: {
     readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
   }
@@ -55,6 +33,23 @@ results.forEach(result => {
   console.log(`Text: ${result.text}`);
   console.log(`Confidence: ${result.confidence}`);
   console.log(`Box:`, result.box.points);
+});
+```
+
+**Using custom model paths (optional):**
+
+```typescript
+import Ocr from '@mirulkhanall/rn-paddle-ocr';
+import * as FileSystem from 'expo-file-system';
+
+// Provide your own model paths if needed
+await Ocr.init({
+  detModelPath: require('./assets/models/inference_det.onnx'),
+  recModelPath: require('./assets/models/inference_rec.onnx'),
+  characterDict: require('./assets/models/character_dict.json'),
+  fileSystemAdapter: {
+    readAsStringAsync: FileSystem.readAsStringAsync.bind(FileSystem)
+  }
 });
 ```
 
