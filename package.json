@@ -1,11 +1,11 @@
 {
   "name": "@mirulkhanall/rn-paddle-ocr",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "React Native package for OCR scanning using PaddleOCR models with multilingual support (Simplified/Traditional Chinese, English)",
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-        "build": "tsc && npm run copy-assets",
+    "build": "tsc && npm run copy-assets",
     "copy-assets": "mkdir -p build/assets/exported_det build/assets/exported_rec && cp -r src/assets/exported_det/* build/assets/exported_det/ && cp -r src/assets/exported_rec/* build/assets/exported_rec/ && cp src/assets/character_dict.json build/assets/",
     "prepare": "npm run build",
     "test": "echo \"Run: node test.js after installing dependencies\"",
