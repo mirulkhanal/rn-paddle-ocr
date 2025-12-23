@@ -30,8 +30,9 @@
     "url": "https://github.com/mirulkhanal/rn-paddle-ocr.git"
   },
   "devDependencies": {
-    "@types/node": "^18.0.0",
     "@types/jpeg-js": "^0.3.7",
+    "@types/node": "^18.0.0",
+    "expo-asset": "^12.0.12",
     "typescript": "^5.0.0"
   },
   "dependencies": {
@@ -45,6 +46,7 @@
     "models/"
   ],
   "peerDependencies": {
+    "expo-asset": "*",
     "react": ">=18.0.0",
     "react-native": ">=0.70.0"
   },

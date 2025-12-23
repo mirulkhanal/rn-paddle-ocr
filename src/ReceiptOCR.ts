@@ -14,7 +14,6 @@ let ortModule: any = null;
 function getOrt(): any {
   if (!ortModule) {
     try {
-      // Use require() which is evaluated lazily when first called
       ortModule = require('onnxruntime-react-native');
       if (!ortModule || !ortModule.InferenceSession || !ortModule.Tensor) {
         throw new Error('onnxruntime-react-native module is not properly loaded');
