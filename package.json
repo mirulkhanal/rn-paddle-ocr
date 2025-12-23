@@ -5,7 +5,8 @@
   "main": "build/index.js",
   "types": "build/index.d.ts",
   "scripts": {
-    "build": "tsc",
+        "build": "tsc && npm run copy-assets",
+    "copy-assets": "mkdir -p build/assets/exported_det build/assets/exported_rec && cp -r src/assets/exported_det/* build/assets/exported_det/ && cp -r src/assets/exported_rec/* build/assets/exported_rec/ && cp src/assets/character_dict.json build/assets/",
     "prepare": "npm run build",
     "test": "echo \"Run: node test.js after installing dependencies\"",
     "version:patch": "npm version patch",
