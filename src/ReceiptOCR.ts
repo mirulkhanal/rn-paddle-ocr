@@ -113,7 +113,9 @@ export class ReceiptOCR {
 
   async loadModel(modelPath: string | number): Promise<void> {
     try {
-      this.detSession = await this.runtime.InferenceSession.create(modelPath);
+      // ORT accepts string paths or Uint8Array, but React Native require() returns number
+      // Cast to any to allow number (module ID) which works at runtime
+      this.detSession = await (this.runtime.InferenceSession.create as any)(modelPath);
     } catch (e) {
       throw new Error(`Failed to load detection model: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -121,7 +123,9 @@ export class ReceiptOCR {
 
   async loadRecognitionModel(modelPath: string | number): Promise<void> {
     try {
-      this.recSession = await this.runtime.InferenceSession.create(modelPath);
+      // ORT accepts string paths or Uint8Array, but React Native require() returns number
+      // Cast to any to allow number (module ID) which works at runtime
+      this.recSession = await (this.runtime.InferenceSession.create as any)(modelPath);
     } catch (e) {
       throw new Error(`Failed to load recognition model: ${e instanceof Error ? e.message : String(e)}`);
     }
