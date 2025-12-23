@@ -4,7 +4,6 @@ import { ReceiptOCR } from './ReceiptOCR';
 import { OcrConfig } from './types/OcrConfig.interface';
 import { OcrResult } from './types/OcrResult.interface';
 
-// Static requires for bundled assets - Metro bundles these at build time
 const DET_MODEL = require('./assets/exported_det/inference.onnx');
 const REC_MODEL = require('./assets/exported_rec/inference.onnx');
 const CHARACTER_DICT = require('./assets/character_dict.json');
@@ -17,13 +16,10 @@ async function ensureInitialized(config?: OcrConfig): Promise<void> {
     return;
   }
 
-  // Zero-config mode: use bundled assets when no config provided
   if (!config) {
-    // Resolve ONNX models to file paths using expo-asset
     const detAsset = Asset.fromModule(DET_MODEL);
     const recAsset = Asset.fromModule(REC_MODEL);
 
-    // Download assets to ensure they're available on device
     await Promise.all([detAsset.downloadAsync(), recAsset.downloadAsync()]);
 
     const detPath = detAsset.localUri;
@@ -33,7 +29,6 @@ async function ensureInitialized(config?: OcrConfig): Promise<void> {
       throw new Error('Failed to resolve bundled model paths. Ensure expo-asset is properly configured.');
     }
 
-    // Character dict is loaded directly from require() (JSON is parsed automatically)
     const characterDict: string[] = CHARACTER_DICT;
     if (!Array.isArray(characterDict) || !characterDict.every(v => typeof v === 'string')) {
       throw new Error('Invalid bundled character dictionary format.');
@@ -44,7 +39,6 @@ async function ensureInitialized(config?: OcrConfig): Promise<void> {
     await ocrInstance.loadRecognitionModel(recPath);
     await ocrInstance.loadCharacterDictFromArray(characterDict);
   } else {
-    // User-provided config mode (backward compatibility)
     if (!config.detModelPath || !config.recModelPath) {
       throw new Error('detModelPath and recModelPath are required in config.');
     }
