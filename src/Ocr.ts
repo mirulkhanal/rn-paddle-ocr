@@ -40,7 +40,7 @@ async function ensureInitialized(config?: OcrConfig): Promise<void> {
 }
 
 export const Ocr = {
-  async init(config: OcrConfig): Promise<void> {
+  async init(config?: OcrConfig): Promise<void> {
     await ensureInitialized(config);
   },
 
