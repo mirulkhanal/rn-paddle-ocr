@@ -1,6 +1,6 @@
 {
   "name": "@mirulkhanall/rn-paddle-ocr",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "React Native package for OCR scanning using PaddleOCR models with multilingual support (Simplified/Traditional Chinese, English)",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -40,7 +40,6 @@
     "buffer": "^6.0.3",
     "jpeg-js": "^0.4.4",
     "js-clipper": "^1.0.1"
-   
   },
   "files": [
     "build/",
@@ -50,8 +49,7 @@
     "expo-asset": "*",
     "react": ">=18.0.0",
     "react-native": ">=0.70.0",
-     "onnxruntime-react-native": "^1.19.0"
-
+    "onnxruntime-react-native": "^1.19.0"
   },
   "engines": {
     "node": ">=16.0.0"
