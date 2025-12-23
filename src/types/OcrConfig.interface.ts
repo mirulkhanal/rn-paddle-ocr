@@ -1,10 +1,12 @@
 import { FileSystemAdapter } from './FileSystemAdapter.interface';
+import { OnnxRuntime } from './OnnxRuntime.interface';
 
 export interface OcrConfig {
-  detModelPath?: string | number;
-  recModelPath?: string | number;
+  runtime: OnnxRuntime;
+  detModelPath: string | number;
+  recModelPath: string | number;
+  characterDict: string[];
   characterDictPath?: string;
-  characterDict?: string[];
   fileSystemAdapter?: FileSystemAdapter;
 }
 

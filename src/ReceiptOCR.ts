@@ -6,28 +6,7 @@ import { Buffer } from 'buffer';
 import { Box } from './types/Box.interface';
 import { OcrResult } from './types/OcrResult.interface';
 import { FileSystemAdapter } from './types/FileSystemAdapter.interface';
-
-// Lazy load onnxruntime-react-native to avoid native module initialization issues
-// Using require with lazy evaluation to prevent immediate native module initialization
-let ortModule: any = null;
-
-function getOrt(): any {
-  if (!ortModule) {
-    try {
-      ortModule = require('onnxruntime-react-native');
-      if (!ortModule || !ortModule.InferenceSession || !ortModule.Tensor) {
-        throw new Error('onnxruntime-react-native module is not properly loaded');
-      }
-    } catch (error) {
-      throw new Error(
-        `Failed to load onnxruntime-react-native. Make sure it's installed and properly linked: npm install onnxruntime-react-native. ` +
-        `You may need to rebuild your app after installing native dependencies. ` +
-        `Error: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-  }
-  return ortModule;
-}
+import { OnnxRuntime } from './types/OnnxRuntime.interface';
 
 export class ReceiptOCR {
   private detSession: any | null = null;
@@ -35,10 +14,12 @@ export class ReceiptOCR {
   private postProcessor: DBPostProcessor;
   private characterDict: string[] | null = null;
   private fsAdapter: FileSystemAdapter | null = null;
+  private runtime: OnnxRuntime;
 
-  constructor(fileSystemAdapter?: FileSystemAdapter) {
+  constructor(runtime: OnnxRuntime, fileSystemAdapter?: FileSystemAdapter) {
     this.postProcessor = new DBPostProcessor();
     this.fsAdapter = fileSystemAdapter || null;
+    this.runtime = runtime;
   }
 
   async loadCharacterDictFromArray(dict: string[]): Promise<void> {
@@ -101,8 +82,7 @@ export class ReceiptOCR {
       );
 
       const floatData = ImageUtils.pixelsToNCHW(crop, targetW, targetH);
-      const ort = getOrt();
-      const inputTensor = new ort.Tensor('float32', floatData, [1, 3, targetH, targetW]);
+      const inputTensor = new this.runtime.Tensor('float32', floatData, [1, 3, targetH, targetW]);
 
       const feeds: Record<string, any> = {};
       const inputNames = this.recSession.inputNames;
@@ -133,8 +113,7 @@ export class ReceiptOCR {
 
   async loadModel(modelPath: string | number): Promise<void> {
     try {
-      const ort = getOrt();
-      this.detSession = await ort.InferenceSession.create(modelPath);
+      this.detSession = await this.runtime.InferenceSession.create(modelPath);
     } catch (e) {
       throw new Error(`Failed to load detection model: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -142,8 +121,7 @@ export class ReceiptOCR {
 
   async loadRecognitionModel(modelPath: string | number): Promise<void> {
     try {
-      const ort = getOrt();
-      this.recSession = await ort.InferenceSession.create(modelPath);
+      this.recSession = await this.runtime.InferenceSession.create(modelPath);
     } catch (e) {
       throw new Error(`Failed to load recognition model: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -189,9 +167,7 @@ export class ReceiptOCR {
     const padH = resizeMeta.padH;
     const padded = ImageUtils.padRGBA(resizedPixels, resizeMeta.resizeW, resizeMeta.resizeH, padW, padH);
     const floatData = ImageUtils.pixelsToNCHW(padded, padW, padH);
-
-    const ort = getOrt();
-    const inputTensor = new ort.Tensor('float32', floatData, [1, 3, padH, padW]);
+    const inputTensor = new this.runtime.Tensor('float32', floatData, [1, 3, padH, padW]);
 
     const feeds: Record<string, any> = {};
     const inputNames = this.detSession.inputNames;
