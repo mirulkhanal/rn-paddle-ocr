@@ -82,7 +82,9 @@ export class ReceiptOCR {
       );
 
       const floatData = ImageUtils.pixelsToNCHW(crop, targetW, targetH);
-      const inputTensor = new this.runtime.Tensor('float32', floatData, [1, 3, targetH, targetW]);
+      const runtime = (this.runtime as any).default || this.runtime;
+      const Tensor = runtime.Tensor || (runtime as any).Tensor;
+      const inputTensor = new Tensor('float32', floatData, [1, 3, targetH, targetW]);
 
       const feeds: Record<string, any> = {};
       const inputNames = this.recSession.inputNames;
@@ -113,9 +115,14 @@ export class ReceiptOCR {
 
   async loadModel(modelPath: string | number): Promise<void> {
     try {
-      // ORT accepts string paths or Uint8Array, but React Native require() returns number
-      // Cast to any to allow number (module ID) which works at runtime
-      this.detSession = await (this.runtime.InferenceSession.create as any)(modelPath);
+      // Handle both direct import and module namespace (await import)
+      const runtime = (this.runtime as any).default || this.runtime;
+      const InferenceSession = runtime.InferenceSession || (runtime as any).InferenceSession;
+      
+      if (!InferenceSession || typeof InferenceSession.create !== 'function') {
+        throw new Error('InferenceSession.create is not available. Make sure onnxruntime-react-native is properly imported.');
+      }
+      this.detSession = await InferenceSession.create(modelPath as any);
     } catch (e) {
       throw new Error(`Failed to load detection model: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -123,9 +130,14 @@ export class ReceiptOCR {
 
   async loadRecognitionModel(modelPath: string | number): Promise<void> {
     try {
-      // ORT accepts string paths or Uint8Array, but React Native require() returns number
-      // Cast to any to allow number (module ID) which works at runtime
-      this.recSession = await (this.runtime.InferenceSession.create as any)(modelPath);
+      // Handle both direct import and module namespace (await import)
+      const runtime = (this.runtime as any).default || this.runtime;
+      const InferenceSession = runtime.InferenceSession || (runtime as any).InferenceSession;
+      
+      if (!InferenceSession || typeof InferenceSession.create !== 'function') {
+        throw new Error('InferenceSession.create is not available. Make sure onnxruntime-react-native is properly imported.');
+      }
+      this.recSession = await InferenceSession.create(modelPath as any);
     } catch (e) {
       throw new Error(`Failed to load recognition model: ${e instanceof Error ? e.message : String(e)}`);
     }
@@ -171,7 +183,9 @@ export class ReceiptOCR {
     const padH = resizeMeta.padH;
     const padded = ImageUtils.padRGBA(resizedPixels, resizeMeta.resizeW, resizeMeta.resizeH, padW, padH);
     const floatData = ImageUtils.pixelsToNCHW(padded, padW, padH);
-    const inputTensor = new this.runtime.Tensor('float32', floatData, [1, 3, padH, padW]);
+    const runtime = (this.runtime as any).default || this.runtime;
+    const Tensor = runtime.Tensor || (runtime as any).Tensor;
+    const inputTensor = new Tensor('float32', floatData, [1, 3, padH, padW]);
 
     const feeds: Record<string, any> = {};
     const inputNames = this.detSession.inputNames;
