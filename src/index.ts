@@ -1,6 +1,5 @@
 export { Ocr } from './Ocr';
 export { ReceiptOCR } from './ReceiptOCR';
-export { getDefaultModelPaths, getDetModelPath, getRecModelPath, getCharacterDictPath } from './utils/modelPaths';
 export type { OcrResult } from './types/OcrResult.interface';
 export type { OcrConfig } from './types/OcrConfig.interface';
 export type { Box } from './types/Box.interface';

@@ -1,7 +1,6 @@
 import { ReceiptOCR } from './ReceiptOCR';
 import { OcrConfig } from './types/OcrConfig.interface';
 import { OcrResult } from './types/OcrResult.interface';
-import { resolveModelConfig } from './utils/modelResolver';
 
 let ocrInstance: ReceiptOCR | null = null;
 let isInitialized = false;
@@ -15,20 +14,26 @@ async function ensureInitialized(config?: OcrConfig): Promise<void> {
     throw new Error('OCR not initialized. Call Ocr.init(config) first or pass config to Ocr.scan().');
   }
 
-  // Resolve model config - automatically uses bundled models if paths not provided
-  const resolvedConfig = resolveModelConfig(config);
+  // Validate required fields
+  if (!config.detModelPath || !config.recModelPath) {
+    throw new Error('detModelPath and recModelPath are required in config.');
+  }
 
-  ocrInstance = new ReceiptOCR(resolvedConfig.fileSystemAdapter);
+  if (!config.characterDict && !config.characterDictPath) {
+    throw new Error('Either characterDict or characterDictPath must be provided in config.');
+  }
+
+  ocrInstance = new ReceiptOCR(config.fileSystemAdapter);
   
-  // Load models - paths are guaranteed to exist after resolution
-  await ocrInstance.loadModel(resolvedConfig.detModelPath!);
-  await ocrInstance.loadRecognitionModel(resolvedConfig.recModelPath!);
+  // Load models
+  await ocrInstance.loadModel(config.detModelPath);
+  await ocrInstance.loadRecognitionModel(config.recModelPath);
   
   // Load character dictionary
-  if (resolvedConfig.characterDict) {
-    await ocrInstance.loadCharacterDictFromArray(resolvedConfig.characterDict);
-  } else if (resolvedConfig.characterDictPath) {
-    await ocrInstance.loadCharacterDict(resolvedConfig.characterDictPath);
+  if (config.characterDict) {
+    await ocrInstance.loadCharacterDictFromArray(config.characterDict);
+  } else if (config.characterDictPath) {
+    await ocrInstance.loadCharacterDict(config.characterDictPath);
   }
 
   isInitialized = true;
