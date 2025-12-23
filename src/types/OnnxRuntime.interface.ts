@@ -1,11 +1,11 @@
 export interface OnnxTensor {
-  dims: number[];
+  dims: readonly number[];
   data: Float32Array | Uint8Array | Int32Array | BigInt64Array;
 }
 
 export interface OnnxInferenceSession {
-  inputNames: string[];
-  outputNames: string[];
+  inputNames: readonly string[];
+  outputNames: readonly string[];
   run(feeds: Record<string, OnnxTensor>): Promise<Record<string, OnnxTensor>>;
 }
 
